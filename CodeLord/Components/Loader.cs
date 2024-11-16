@@ -14,6 +14,7 @@ namespace CodeLord.Components
             try
             {
                 dict = ProcessEntries(ReadEntries(path));
+                Console.WriteLine($"词库载入成功，共{dict.Count}个词。");
                 return true;
             }
             catch (Exception e)
@@ -38,7 +39,7 @@ namespace CodeLord.Components
                             _ = entries.Add((slices[0], slices[1], priority));
                         else Console.WriteLine($"词库格式错误，无法识别优先级：{line}");
                 }
-                return entries.Count > 0 ? entries : throw new Exception("词库为空。");
+                return entries.Count == 0 ? throw new Exception("词库为空。") : entries;
 
                 static string RemoveComment(string line)
                 {
@@ -58,9 +59,7 @@ namespace CodeLord.Components
                         realCode = $"{code}{position}"; // 选重直接加数字
                     _ = dict.TryAdd(word, realCode);
                 }
-                if (dict.IsEmpty) throw new Exception("词库为空。");
-                Console.WriteLine($"词库载入成功，共{dict.Count}个词。");
-                return dict;
+                return dict.IsEmpty ? throw new Exception("词库为空。") : dict;
             }
         }
 
@@ -74,6 +73,7 @@ namespace CodeLord.Components
             {
                 using StreamReader sr = new(path, Encoding.UTF8);
                 text = sr.ReadToEnd();
+                Console.WriteLine($"文本载入成功，共{text.Length}个字。");
                 return true;
             }
             catch (Exception e)
