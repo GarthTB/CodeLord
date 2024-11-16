@@ -12,13 +12,9 @@ namespace CodeLord.Components
         {
             try
             {
-                Console.WriteLine("开始寻找所有可能的编码...");
                 var tree = FindBranches(dict, text);
-                Console.WriteLine("已全部找到。正在寻找最短编码...");
-                var best = FindShortest(tree, text, constant);
-                Console.WriteLine("已找到并输出最短编码。正在分析...");
-                Analyze(best, dict, text);
-                Console.WriteLine("已完成分析并输出结果。程序结束。");
+                var bestWays = FindShortest(tree, text, constant);
+                Analyze(bestWays, dict, text);
             }
             catch (Exception e)
             {
@@ -29,9 +25,10 @@ namespace CodeLord.Components
         /// <summary> 找出所有可能的编码分支 </summary>
         /// <param name="dict"></param>
         /// <param name="text"></param>
-        /// <returns> 每个元素为（起始索引，词的长度，编码） </returns>
+        /// <returns> 每个元素为（起始索引，词的长度，编码），每个索引都一定会有编码 </returns>
         private static ConcurrentBag<(int, int, string)> FindBranches(ConcurrentDictionary<string, string> dict, string text)
         {
+            Console.WriteLine("正在寻找所有可能的编码分支...");
             ConcurrentBag<(int, int, string)> tree = [];
             _ = Parallel.For(0, text.Length, i =>
             {
@@ -42,17 +39,53 @@ namespace CodeLord.Components
                         tree.Add(branch);
                 else tree.Add((i, 1, text[i].ToString()));
             });
+            Console.WriteLine($"共找到{tree.Count}个分支。");
             return tree;
         }
 
-        private static string FindShortest(ConcurrentBag<(int, int, string)> tree, string text, bool constant)
+        /// <summary> 遍历所有编码以找出最短编码并输出 </summary>
+        /// <param name="tree"> 以（起始索引，词的长度，编码）表示的所有编码分支 </param>
+        /// <param name="text"> 要编码的文本 </param>
+        /// <param name="constant"> 是否为整句输入。如果否，则词之间要加空格。 </param>
+        /// <returns> 长度最短的所有编码 </returns>
+        private static List<string> FindShortest(ConcurrentBag<(int head, int length, string code)> tree, string text, bool constant)
         {
+            Console.WriteLine("正在寻找最短编码...");
+            var ways = FindAllWays(tree, text, constant);
+            var bestLength = ways.Min(x => x.Length);
+            var bestWays = ways.Where(x => x.Length == bestLength).ToList();
+            Console.WriteLine($"已找到{bestWays.Count}种最短编码。正在输出...");
+            FileWriter.WriteWays(bestWays);
+            return bestWays;
 
+            static HashSet<string> FindAllWays(ConcurrentBag<(int head, int length, string code)> tree, string text, bool constant)
+            {
+                List<(string way, int tail)> ways = [];
+
+                var starters = tree.Where(x => x.head == 0);
+                foreach (var (head, length, code) in starters)
+                    ways.Add((code, head + length));
+
+                for (int i = 1; i < text.Length; i++)
+                {
+                    var prefixes = ways.Where(x => x.tail == i);
+                    if (!prefixes.Any()) continue;
+                    var suffixes = tree.Where(x => x.head == i);
+                    foreach (var (way, tail) in prefixes)
+                        foreach (var (head, length, code) in suffixes)
+                            ways.Add(constant
+                                ? ($"{way}{code}", head + length)
+                                : ($"{way} {code}", head + length));
+                    _ = ways.RemoveAll(x => x.tail == i);
+                }
+
+                return ways.Select(x => x.way).ToHashSet();
+            }
         }
 
-        private static void Analyze(string best, ConcurrentDictionary<string, string> dict, string text)
+        private static void Analyze(List<string> bestWays, ConcurrentDictionary<string, string> dict, string text)
         {
-
+            //Console.WriteLine($"正在分析...");
         }
     }
 }

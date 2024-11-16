@@ -72,7 +72,7 @@ namespace CodeLord.Components
                              .ForAll(group => dict[group.Key] = group.Select(pair => pair.code)
                                                                      .OrderBy(code => code.Length)
                                                                      .First());
-                return dict.IsEmpty ? throw new Exception("无法提取最短编码。") : dict;
+                return dict.IsEmpty ? throw new Exception("无法提取每个词的最短编码。") : dict;
             }
         }
 
@@ -87,6 +87,7 @@ namespace CodeLord.Components
                 using StreamReader sr = new(path, Encoding.UTF8);
                 text = sr.ReadToEnd();
                 Console.WriteLine($"文本载入成功，共{text.Length}个字。");
+                FileWriter.TextPath = path;
                 return true;
             }
             catch (Exception e)
