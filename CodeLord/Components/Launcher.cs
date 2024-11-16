@@ -8,9 +8,11 @@ namespace CodeLord.Components
         {
             var dict = GetDict();
             var text = GetText();
-            var sentenceIn = GetSentenceIn();
+            var constant = GetSentenceIn();
 
-            Encoder.Encode(dict, text, sentenceIn);
+            Encoder.Encode(dict, text, constant);
+            Console.WriteLine("如需重新计算，请再次启动。按任意键退出...");
+            _ = Console.ReadKey();
 
             static ConcurrentDictionary<string, string> GetDict()
             {
@@ -45,7 +47,7 @@ namespace CodeLord.Components
             }
         }
 
-        public static void Launch(string dictPath, string textPath, bool sentenceIn)
+        public static void Launch(string dictPath, string textPath, bool constant)
         {
             if (File.Exists(dictPath) && File.Exists(textPath))
             {
@@ -53,7 +55,7 @@ namespace CodeLord.Components
                     Console.WriteLine("词库载入失败。");
                 else if (!Loader.LoadText(textPath, out var text))
                     Console.WriteLine("文本载入失败。");
-                else Encoder.Encode(dict, text, sentenceIn);
+                else Encoder.Encode(dict, text, constant);
             }
             else Console.WriteLine("无效的词库或文本路径。");
         }

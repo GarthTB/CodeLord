@@ -4,13 +4,21 @@ namespace CodeLord.Components
 {
     internal static class Encoder
     {
-        public static void Encode(ConcurrentDictionary<string, string> dict, string text, bool sentenceIn)
+        /// <summary> 找出最短编码 </summary>
+        /// <param name="dict"> 词库，键值对为（词，编码） </param>
+        /// <param name="text"> 要编码的文本 </param>
+        /// <param name="constant"> 是否为整句输入。如果否，则词之间要加空格。 </param>
+        public static void Encode(ConcurrentDictionary<string, string> dict, string text, bool constant)
         {
             try
             {
+                Console.WriteLine("开始寻找所有可能的编码...");
                 var tree = FindBranches(dict, text);
-                var best = FindShortest(tree, sentenceIn);
-                Analyze(best);
+                Console.WriteLine("已全部找到。正在寻找最短编码...");
+                var best = FindShortest(tree, text, constant);
+                Console.WriteLine("已找到并输出最短编码。正在分析...");
+                Analyze(best, dict, text);
+                Console.WriteLine("已完成分析并输出结果。程序结束。");
             }
             catch (Exception e)
             {
@@ -35,6 +43,16 @@ namespace CodeLord.Components
                 else tree.Add((i, 1, text[i].ToString()));
             });
             return tree;
+        }
+
+        private static string FindShortest(ConcurrentBag<(int, int, string)> tree, string text, bool constant)
+        {
+
+        }
+
+        private static void Analyze(string best, ConcurrentDictionary<string, string> dict, string text)
+        {
+
         }
     }
 }
