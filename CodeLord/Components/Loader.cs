@@ -3,7 +3,7 @@ using System.Text;
 
 namespace CodeLord.Components
 {
-    internal class Loader
+    internal static class Loader
     {
         /// <summary> 载入词库 </summary>
         /// <param name="path"> 提供的词库路径 </param>

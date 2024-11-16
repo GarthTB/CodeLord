@@ -2,7 +2,7 @@
 
 namespace CodeLord.Components
 {
-    internal class Launcher
+    internal static class Launcher
     {
         public static void Initialize()
         {
@@ -10,7 +10,7 @@ namespace CodeLord.Components
             var text = GetText();
             var sentenceIn = GetSentenceIn();
 
-            new Encoder(dict, text, sentenceIn).Encode();
+            Encoder.Encode(dict, text, sentenceIn);
 
             static ConcurrentDictionary<string, string> GetDict()
             {
@@ -53,7 +53,7 @@ namespace CodeLord.Components
                     Console.WriteLine("词库载入失败。");
                 else if (!Loader.LoadText(textPath, out var text))
                     Console.WriteLine("文本载入失败。");
-                else new Encoder(dict, text, sentenceIn).Encode();
+                else Encoder.Encode(dict, text, sentenceIn);
             }
             else Console.WriteLine("无效的词库或文本路径。");
         }
