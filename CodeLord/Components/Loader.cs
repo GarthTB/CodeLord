@@ -13,7 +13,9 @@ namespace CodeLord.Components
         {
             try
             {
-                dict = ProcessEntries(ReadEntries(path));
+                var entries = ReadEntries(path);
+                var wordCodePairs = GenerateRealCodes(entries);
+                dict = FindShortest(wordCodePairs);
                 Console.WriteLine($"词库载入成功，共{dict.Count}个词。");
                 return true;
             }
@@ -39,7 +41,7 @@ namespace CodeLord.Components
                             _ = entries.Add((slices[0], slices[1], priority));
                         else Console.WriteLine($"词库格式错误，无法识别优先级：{line}");
                 }
-                return entries.Count == 0 ? throw new Exception("词库为空。") : entries;
+                return entries.Count == 0 ? throw new Exception("读取不到词库条目。") : entries;
 
                 static string RemoveComment(string line)
                 {
@@ -48,18 +50,29 @@ namespace CodeLord.Components
                 }
             }
 
-            static ConcurrentDictionary<string, string> ProcessEntries(HashSet<(string word, string code, int priority)> entries)
+            static List<(string, string)> GenerateRealCodes(HashSet<(string word, string code, int priority)> entries)
             {
                 var orderedEntries = entries.OrderByDescending(x => x.priority);
-                ConcurrentDictionary<string, string> dict = [];
+                List<(string word, string code)> wordCodePairs = [];
                 foreach (var (word, code, priority) in orderedEntries)
                 {
                     var realCode = code;
-                    for (int position = 2; dict.Any(x => x.Value == realCode); position++)
+                    for (int position = 2; wordCodePairs.Any(x => x.code == realCode); position++)
                         realCode = $"{code}{position}"; // 选重直接加数字
-                    _ = dict.TryAdd(word, realCode);
+                    wordCodePairs.Add((word, realCode));
                 }
-                return dict.IsEmpty ? throw new Exception("词库为空。") : dict;
+                return wordCodePairs.Count == 0 ? throw new Exception("无法生成实际编码。") : wordCodePairs;
+            }
+
+            static ConcurrentDictionary<string, string> FindShortest(List<(string word, string code)> wordCodePairs)
+            {
+                ConcurrentDictionary<string, string> dict = [];
+                wordCodePairs.AsParallel()
+                             .GroupBy(pair => pair.word)
+                             .ForAll(group => dict[group.Key] = group.Select(pair => pair.code)
+                                                                     .OrderBy(code => code.Length)
+                                                                     .First());
+                return dict.IsEmpty ? throw new Exception("无法提取最短编码。") : dict;
             }
         }
 

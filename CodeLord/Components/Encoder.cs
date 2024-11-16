@@ -6,7 +6,9 @@ namespace CodeLord.Components
     {
         public void Encode()
         {
-
+            var branches = FindBranches(dict, text);
+            var best = FindShortest(branches, sentenceIn);
+            var result = Analyze(best);
         }
     }
 }
