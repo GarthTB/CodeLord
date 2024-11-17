@@ -50,26 +50,26 @@ namespace CodeLord.Components
                 }
             }
 
-            static List<(string, string)> GenerateRealCodes(HashSet<(string word, string code, int priority)> entries)
+            static Dictionary<string, string> GenerateRealCodes(HashSet<(string word, string code, int priority)> entries)
             {
                 var orderedEntries = entries.OrderByDescending(x => x.priority);
-                List<(string word, string code)> wordCodePairs = [];
+                Dictionary<string, string> wordCodePairs = [];
                 foreach (var (word, code, priority) in orderedEntries)
                 {
                     var realCode = code;
-                    for (int position = 2; wordCodePairs.Any(x => x.code == realCode); position++)
+                    for (int position = 2; wordCodePairs.ContainsValue(realCode); position++)
                         realCode = $"{code}{position}"; // 选重直接加数字
-                    wordCodePairs.Add((word, realCode));
+                    wordCodePairs.Add(word, realCode);
                 }
                 return wordCodePairs.Count == 0 ? throw new Exception("无法生成实际编码。") : wordCodePairs;
             }
 
-            static ConcurrentDictionary<string, string> FindShortest(List<(string word, string code)> wordCodePairs)
+            static ConcurrentDictionary<string, string> FindShortest(Dictionary<string, string> wordCodePairs)
             {
                 ConcurrentDictionary<string, string> dict = [];
                 wordCodePairs.AsParallel()
-                             .GroupBy(pair => pair.word)
-                             .ForAll(group => dict[group.Key] = group.Select(pair => pair.code)
+                             .GroupBy(pair => pair.Key)
+                             .ForAll(group => dict[group.Key] = group.Select(pair => pair.Value)
                                                                      .OrderBy(code => code.Length)
                                                                      .First());
                 return dict.IsEmpty ? throw new Exception("无法提取每个词的最短编码。") : dict;

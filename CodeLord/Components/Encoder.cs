@@ -49,13 +49,14 @@ namespace CodeLord.Components
         /// <param name="text"> 要编码的文本 </param>
         /// <param name="constant"> 是否为整句输入。如果否，则词之间要加空格。 </param>
         /// <returns> 长度最短的所有编码 </returns>
-        private static List<string> FindShortest(ConcurrentBag<(int head, int length, string code)> tree, string text, bool constant)
+        private static string[] FindShortest(ConcurrentBag<(int head, int length, string code)> tree, string text, bool constant)
         {
-            Console.WriteLine("正在寻找最短编码...");
+            Console.WriteLine("正在遍历所有编码情况...");
             var ways = FindAllWays(tree, text, constant);
+            Console.WriteLine($"遍历完成，共{ways.Count}种编码。");
             var bestLength = ways.Min(x => x.Length);
-            var bestWays = ways.Where(x => x.Length == bestLength).ToList();
-            Console.WriteLine($"已找到{bestWays.Count}种最短编码。");
+            var bestWays = ways.Where(x => x.Length == bestLength).ToArray();
+            Console.WriteLine($"已找到{bestWays.Length}种最短编码。");
             return bestWays;
 
             static HashSet<string> FindAllWays(ConcurrentBag<(int head, int length, string code)> tree, string text, bool constant)
@@ -85,11 +86,11 @@ namespace CodeLord.Components
 
         /// <summary> 分析每种最短编码并生成分析报告 </summary>
         /// <returns> 分析报告，每个元素为（第n种最短编码，各项评估列表） </returns>
-        private static List<string>[] Analyze(List<string> bestWays, string text)
+        private static List<string>[] Analyze(string[] bestWays, string text)
         {
             Console.WriteLine("正在分析每种最短编码并生成分析报告...");
-            var report = new List<string>[bestWays.Count];
-            for (int i = 0; i < bestWays.Count; i++)
+            var report = new List<string>[bestWays.Length];
+            for (int i = 0; i < bestWays.Length; i++)
             {
                 string way = bestWays[i];
                 report[i] = [$"编码\t{way}"];
