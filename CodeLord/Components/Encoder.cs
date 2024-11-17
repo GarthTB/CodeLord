@@ -68,8 +68,8 @@ namespace CodeLord.Components
 
                 for (int i = 1; i < text.Length; i++)
                 {
-                    var prefixes = ways.Where(x => x.tail == i);
-                    if (!prefixes.Any()) continue;
+                    var prefixes = ways.Where(x => x.tail == i).ToArray();
+                    if (prefixes.Length == 0) continue;
                     var suffixes = tree.Where(x => x.head == i);
                     foreach (var (way, tail) in prefixes)
                         foreach (var (head, length, code) in suffixes)
