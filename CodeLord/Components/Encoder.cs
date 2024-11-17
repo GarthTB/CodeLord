@@ -75,8 +75,8 @@ namespace CodeLord.Components
 
                 foreach (var way in prefixes)
                     foreach (var (head, length, code) in suffixes)
-                        tempWays.Add((Connect(constant, way, code), head + length));
-                
+                        tempWays.Add((Concater.Join(constant, way, code), head + length));
+
                 _ = tempWays.RemoveAll(x => x.tail == i);
                 Console.Write($"\r已遍历至第{i}字。");
             }
@@ -84,11 +84,6 @@ namespace CodeLord.Components
             var ways = tempWays.Select(x => x.way).Distinct().ToArray();
             Console.WriteLine($"\n遍历完成，共{ways.Length}种最短编码。");
             return ways;
-        }
-
-        private static string Connect(bool constant, string head, string tail)
-        {
-            return constant ? $"{head}{tail}" : $"{head} {tail}";
         }
 
         /// <summary> 分析每种最短编码并生成分析报告 </summary>
