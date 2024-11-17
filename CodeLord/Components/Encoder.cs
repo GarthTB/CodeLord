@@ -54,21 +54,22 @@ namespace CodeLord.Components
         private static string[] FindShortest(ConcurrentBag<(int head, int length, string code)> tree, string text, int codeID)
         {
             Console.WriteLine("正在遍历所有编码情况...");
-            List<(string way, int tail)> tempWays = [];
+            Dictionary<string, int> tempWays = [];
 
             var starters = tree.Where(x => x.head == 0);
             foreach (var (_, length, code) in starters)
-                tempWays.Add((code, length));
+                tempWays[code] = length;
 
             Console.WriteLine($"共需遍历{text.Length}字：");
             for (int i = 1; i < text.Length; i++)
             {
-                var prefixes = tempWays.Where(x => x.tail == i)
-                                       .Select(x => x.way)
-                                       .Distinct()
+                var prefixes = tempWays.Where(x => x.Value == i)
+                                       .Select(x => x.Key)
                                        .ToList();
                 if (prefixes.Count == 0) continue;
-                _ = tempWays.RemoveAll(x => x.tail == i);
+
+                foreach (var way in prefixes)
+                    _ = tempWays.Remove(way);
 
                 var mLength = prefixes.Min(x => x.Length);
                 _ = prefixes.RemoveAll(x => x.Length != mLength);
@@ -76,12 +77,12 @@ namespace CodeLord.Components
 
                 foreach (var way in prefixes)
                     foreach (var (_, length, code) in suffixes)
-                        tempWays.Add((Concater.Join(codeID, way, code), i + length));
+                        tempWays[Concater.Join(codeID, way, code)] = i + length;
 
                 Console.Write($"\r已遍历至第{i}字。");
             }
 
-            var ways = tempWays.Select(x => x.way).Distinct().ToArray();
+            var ways = tempWays.Keys.ToArray();
             Console.WriteLine($"\n遍历完成，共{ways.Length}种最短编码。");
             return ways;
         }
