@@ -72,7 +72,7 @@ namespace CodeLord.Components
                     var prefixes = ways.Where(x => x.tail == i).ToArray();
                     if (prefixes.Length == 0) continue;
                     var suffixes = tree.Where(x => x.head == i);
-                    foreach (var (way, tail) in prefixes)
+                    foreach (var (way, _) in prefixes)
                         foreach (var (head, length, code) in suffixes)
                             ways.Add(constant
                                 ? ($"{way}{code}", head + length)
