@@ -13,8 +13,8 @@ namespace CodeLord.Components
             try
             {
                 var tree = FindBranches(dict, text);
-                var bestWays = FindShortest(tree, text, constant);
-                var report = Analyze(bestWays, text);
+                var ways = FindShortest(tree, text, constant);
+                var report = Analyze(ways, text);
                 Reporter.Output(report);
             }
             catch (Exception e)
@@ -34,8 +34,9 @@ namespace CodeLord.Components
             _ = Parallel.For(0, text.Length, i =>
             {
                 var branches = dict.Where(x => text[i..].StartsWith(x.Key))
-                                   .Select(x => (i, x.Key.Length, x.Value));
-                if (branches.Any())
+                                   .Select(x => (i, x.Key.Length, x.Value))
+                                   .ToArray();
+                if (branches.Length != 0)
                     foreach (var (j, length, localList) in branches)
                         foreach (var code in localList)
                             tree.Add((j, length, code));
@@ -53,46 +54,52 @@ namespace CodeLord.Components
         private static string[] FindShortest(ConcurrentBag<(int head, int length, string code)> tree, string text, bool constant)
         {
             Console.WriteLine("正在遍历所有编码情况...");
-            var ways = FindAllWays(tree, text, constant);
-            Console.WriteLine($"遍历完成，共{ways.Count}种编码。");
-            var bestLength = ways.Min(x => x.Length);
-            var bestWays = ways.Where(x => x.Length == bestLength).ToArray();
-            Console.WriteLine($"已找到{bestWays.Length}种最短编码。");
-            return bestWays;
+            List<(string way, int tail)> tempWays = [];
 
-            static HashSet<string> FindAllWays(ConcurrentBag<(int head, int length, string code)> tree, string text, bool constant)
+            var starters = tree.Where(x => x.head == 0);
+            foreach (var (head, length, code) in starters)
+                tempWays.Add((code, head + length));
+
+            Console.WriteLine($"共{text.Length}字：");
+            for (int i = 1; i < text.Length; i++)
             {
-                List<(string way, int tail)> ways = [];
-                var starters = tree.Where(x => x.head == 0);
-                foreach (var (head, length, code) in starters)
-                    ways.Add((code, head + length));
+                var prefixes = tempWays.Where(x => x.tail == i)
+                                       .Select(x => x.way)
+                                       .Distinct()
+                                       .ToList();
+                if (prefixes.Count == 0) continue;
 
-                for (int i = 1; i < text.Length; i++)
-                {
-                    var prefixes = ways.Where(x => x.tail == i).ToArray();
-                    if (prefixes.Length == 0) continue;
-                    var suffixes = tree.Where(x => x.head == i);
-                    foreach (var (way, _) in prefixes)
-                        foreach (var (head, length, code) in suffixes)
-                            ways.Add(constant
-                                ? ($"{way}{code}", head + length)
-                                : ($"{way} {code}", head + length));
-                    _ = ways.RemoveAll(x => x.tail == i);
-                }
+                var mLength = prefixes.Min(x => x.Length);
+                _ = prefixes.RemoveAll(x => x.Length != mLength);
+                var suffixes = tree.Where(x => x.head == i);
 
-                return ways.Select(x => x.way).ToHashSet();
+                foreach (var way in prefixes)
+                    foreach (var (head, length, code) in suffixes)
+                        tempWays.Add((Connect(constant, way, code), head + length));
+                
+                _ = tempWays.RemoveAll(x => x.tail == i);
+                Console.Write($"\r已遍历至第{i}字。");
             }
+
+            var ways = tempWays.Select(x => x.way).Distinct().ToArray();
+            Console.WriteLine($"\n遍历完成，共{ways.Length}种最短编码。");
+            return ways;
+        }
+
+        private static string Connect(bool constant, string head, string tail)
+        {
+            return constant ? $"{head}{tail}" : $"{head} {tail}";
         }
 
         /// <summary> 分析每种最短编码并生成分析报告 </summary>
         /// <returns> 分析报告，每个元素为（第n种最短编码，各项评估列表） </returns>
-        private static List<string>[] Analyze(string[] bestWays, string text)
+        private static List<string>[] Analyze(string[] ways, string text)
         {
             Console.WriteLine("正在分析每种最短编码并生成分析报告...");
-            var report = new List<string>[bestWays.Length];
-            for (int i = 0; i < bestWays.Length; i++)
+            var report = new List<string>[ways.Length];
+            for (int i = 0; i < ways.Length; i++)
             {
-                string way = bestWays[i];
+                string way = ways[i];
                 report[i] = [$"编码\t{way}"];
                 report[i].Add($"总码长\t{way.Length}");
                 report[i].Add($"字数\t{text.Length}");
