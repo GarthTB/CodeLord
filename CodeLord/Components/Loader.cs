@@ -87,7 +87,7 @@ namespace CodeLord.Components
                 using StreamReader sr = new(path, Encoding.UTF8);
                 text = sr.ReadToEnd();
                 Console.WriteLine($"文本载入成功，共{text.Length}个字。");
-                FileWriter.TextPath = path;
+                Reporter.TextPath = path;
                 return true;
             }
             catch (Exception e)

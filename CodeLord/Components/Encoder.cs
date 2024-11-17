@@ -14,11 +14,12 @@ namespace CodeLord.Components
             {
                 var tree = FindBranches(dict, text);
                 var bestWays = FindShortest(tree, text, constant);
-                Analyze(bestWays, dict, text);
+                var result = Analyze(bestWays, dict, text);
+                Output(result);
             }
             catch (Exception e)
             {
-                Console.WriteLine($"编码计算出错：{e.Message}");
+                Console.WriteLine($"运行出错：{e.Message}");
             }
         }
 
@@ -54,8 +55,7 @@ namespace CodeLord.Components
             var ways = FindAllWays(tree, text, constant);
             var bestLength = ways.Min(x => x.Length);
             var bestWays = ways.Where(x => x.Length == bestLength).ToList();
-            Console.WriteLine($"已找到{bestWays.Count}种最短编码。正在输出...");
-            FileWriter.WriteWays(bestWays);
+            Console.WriteLine($"已找到{bestWays.Count}种最短编码。");
             return bestWays;
 
             static HashSet<string> FindAllWays(ConcurrentBag<(int head, int length, string code)> tree, string text, bool constant)
@@ -83,9 +83,19 @@ namespace CodeLord.Components
             }
         }
 
-        private static void Analyze(List<string> bestWays, ConcurrentDictionary<string, string> dict, string text)
+        /// <summary> 分析每种最短编码并生成分析报告 </summary>
+        /// <returns> 分析报告，每个元素为（第n种最短编码，各项评估列表） </returns>
+        private static List<(int, List<string>)> Analyze(List<string> bestWays, ConcurrentDictionary<string, string> dict, string text)
         {
-            //Console.WriteLine($"正在分析...");
+            Console.WriteLine("正在分析每种最短编码并生成分析报告...");
+
+            Console.WriteLine("分析完成。");
+        }
+
+        /// <summary> 以控制台或文件形式输出分析报告 </summary>
+        private static void OutPut(List<(int, List<string>)> report)
+        {
+
         }
     }
 }
