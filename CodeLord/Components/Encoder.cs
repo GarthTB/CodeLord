@@ -65,11 +65,11 @@ namespace CodeLord.Components
             {
                 var prefixes = tempWays.Where(x => x.Value == i)
                                        .Select(x => x.Key)
-                                       .ToList();
-                if (prefixes.Count == 0) continue;
+                                       .ToArray();
+                if (prefixes.Length == 0) continue;
 
                 var mLength = prefixes.Min(x => x.Length);
-                var suffixes = tree.Where(x => x.head == i);
+                var suffixes = tree.Where(x => x.head == i).ToArray();
                 foreach (var prefix in prefixes)
                 {
                     _ = tempWays.Remove(prefix);
