@@ -9,7 +9,7 @@ namespace CodeLord.Components
         /// <param name="path"> 提供的词库路径 </param>
         /// <param name="dict"> 载入的词库，键值对为（词，编码） </param>
         /// <returns> 是否载入成功 </returns>
-        public static bool LoadDict(string path, out ConcurrentDictionary<string, string> dict)
+        public static bool LoadDict(string path, out ConcurrentDictionary<string, List<string>> dict)
         {
             try
             {
@@ -49,22 +49,28 @@ namespace CodeLord.Components
                 }
             }
 
-            static ConcurrentDictionary<string, string> GenerateRealCodes(HashSet<(string word, string code, int priority)> entries)
+            static ConcurrentDictionary<string, List<string>> GenerateRealCodes(HashSet<(string word, string code, int priority)> entries)
             {
                 var orderedEntries = entries.OrderByDescending(x => x.priority);
-                ConcurrentDictionary<string, string> wordCodePairs = [];
+                ConcurrentDictionary<string, List<string>> wordCodePairs = [];
+                HashSet<string> usedCode = [];
                 foreach (var (word, code, _) in orderedEntries)
                 {
-                    var realCode = code;
-                    for (int position = 2; wordCodePairs.Values.Contains(realCode); position++)
-                        realCode = $"{code}{position}"; // 选重直接加数字
-                    if (wordCodePairs.TryAdd(word, realCode)) continue;
-                    var oldCode = wordCodePairs[word];
-                    wordCodePairs[word] = Shorter(realCode, oldCode);
+                    string realCode = DistinctAndRecord(usedCode, code);
+                    if (wordCodePairs.TryGetValue(word, out var localList))
+                        localList.Add(realCode);
+                    else wordCodePairs[word] = [realCode];
                 }
                 return wordCodePairs.IsEmpty ? throw new Exception("无法生成实际编码。") : wordCodePairs;
 
-                static string Shorter(string a, string b) => a.Length < b.Length ? a : b;
+                static string DistinctAndRecord(HashSet<string> usedCode, string code)
+                {
+                    var realCode = code;
+                    for (int position = 2; usedCode.Contains(realCode); position++)
+                        realCode = $"{code}{position}"; // 选重直接加数字
+                    _ = usedCode.Add(realCode);
+                    return realCode;
+                }
             }
         }
 

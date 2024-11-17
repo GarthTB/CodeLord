@@ -8,7 +8,7 @@ namespace CodeLord.Components
         /// <param name="dict"> 词库，键值对为（词，编码） </param>
         /// <param name="text"> 要编码的文本 </param>
         /// <param name="constant"> 是否为整句输入。如果否，则词之间要加空格。 </param>
-        public static void Encode(ConcurrentDictionary<string, string> dict, string text, bool constant)
+        public static void Encode(ConcurrentDictionary<string, List<string>> dict, string text, bool constant)
         {
             try
             {
@@ -27,7 +27,7 @@ namespace CodeLord.Components
         /// <param name="dict"></param>
         /// <param name="text"></param>
         /// <returns> 每个元素为（起始索引，词的长度，编码），每个索引都一定会有编码 </returns>
-        private static ConcurrentBag<(int, int, string)> FindBranches(ConcurrentDictionary<string, string> dict, string text)
+        private static ConcurrentBag<(int, int, string)> FindBranches(ConcurrentDictionary<string, List<string>> dict, string text)
         {
             Console.WriteLine("正在寻找所有可能的编码分支...");
             ConcurrentBag<(int, int, string)> tree = [];
@@ -36,8 +36,9 @@ namespace CodeLord.Components
                 var branches = dict.Where(x => text[i..].StartsWith(x.Key))
                                    .Select(x => (i, x.Key.Length, x.Value));
                 if (branches.Any())
-                    foreach (var branch in branches)
-                        tree.Add(branch);
+                    foreach (var (j, length, localList) in branches)
+                        foreach (var code in localList)
+                            tree.Add((j, length, code));
                 else tree.Add((i, 1, text[i].ToString()));
             });
             Console.WriteLine($"共找到{tree.Count}个分支。");
@@ -62,7 +63,6 @@ namespace CodeLord.Components
             static HashSet<string> FindAllWays(ConcurrentBag<(int head, int length, string code)> tree, string text, bool constant)
             {
                 List<(string way, int tail)> ways = [];
-
                 var starters = tree.Where(x => x.head == 0);
                 foreach (var (head, length, code) in starters)
                     ways.Add((code, head + length));
