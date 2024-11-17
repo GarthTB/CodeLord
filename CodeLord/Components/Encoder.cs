@@ -14,7 +14,7 @@ namespace CodeLord.Components
             {
                 var tree = FindBranches(dict, text);
                 var ways = FindShortest(tree, text, codeID);
-                var report = Analyzer.Report(ways, text);
+                var report = Analyzer.GenerateReport(ways, text);
                 Reporter.Output(report);
             }
             catch (Exception e)
@@ -57,10 +57,10 @@ namespace CodeLord.Components
             List<(string way, int tail)> tempWays = [];
 
             var starters = tree.Where(x => x.head == 0);
-            foreach (var (head, length, code) in starters)
-                tempWays.Add((code, head + length));
+            foreach (var (_, length, code) in starters)
+                tempWays.Add((code, length));
 
-            Console.WriteLine($"共{text.Length}字：");
+            Console.WriteLine($"共需遍历{text.Length}字：");
             for (int i = 1; i < text.Length; i++)
             {
                 var prefixes = tempWays.Where(x => x.tail == i)
@@ -68,16 +68,16 @@ namespace CodeLord.Components
                                        .Distinct()
                                        .ToList();
                 if (prefixes.Count == 0) continue;
+                _ = tempWays.RemoveAll(x => x.tail == i);
 
                 var mLength = prefixes.Min(x => x.Length);
                 _ = prefixes.RemoveAll(x => x.Length != mLength);
                 var suffixes = tree.Where(x => x.head == i);
 
                 foreach (var way in prefixes)
-                    foreach (var (head, length, code) in suffixes)
-                        tempWays.Add((Concater.Join(codeID, way, code), head + length));
+                    foreach (var (_, length, code) in suffixes)
+                        tempWays.Add((Concater.Join(codeID, way, code), i + length));
 
-                _ = tempWays.RemoveAll(x => x.tail == i);
                 Console.Write($"\r已遍历至第{i}字。");
             }
 

@@ -30,6 +30,7 @@ namespace CodeLord.Components
                     sw.WriteLine($"第{i + 1}种最短编码：");
                     foreach (var line in report[i])
                         sw.WriteLine(line);
+                    sw.WriteLine();
                 }
 
                 Console.WriteLine("分析报告已成功写入文件。");
@@ -50,6 +51,7 @@ namespace CodeLord.Components
                 Console.WriteLine($"第{i + 1}种最短编码：");
                 foreach (var line in report[i])
                     Console.WriteLine(line);
+                Console.WriteLine();
             }
             Console.WriteLine("分析报告输出完毕。");
         }
