@@ -14,7 +14,7 @@ namespace CodeLord.Components
             {
                 var tree = FindBranches(dict, text);
                 var ways = FindShortest(tree, text, codeID);
-                var report = Analyze(ways, text);
+                var report = Analyzer.Report(ways, text);
                 Reporter.Output(report);
             }
             catch (Exception e)
@@ -84,24 +84,6 @@ namespace CodeLord.Components
             var ways = tempWays.Select(x => x.way).Distinct().ToArray();
             Console.WriteLine($"\n遍历完成，共{ways.Length}种最短编码。");
             return ways;
-        }
-
-        /// <summary> 分析每种最短编码并生成分析报告 </summary>
-        /// <returns> 分析报告，每个元素为（第n种最短编码，各项评估列表） </returns>
-        private static List<string>[] Analyze(string[] ways, string text)
-        {
-            Console.WriteLine("正在分析每种最短编码并生成分析报告...");
-            var report = new List<string>[ways.Length];
-            for (int i = 0; i < ways.Length; i++)
-            {
-                string way = ways[i];
-                report[i] = [$"编码\t{way}"];
-                report[i].Add($"总码长\t{way.Length}");
-                report[i].Add($"字数\t{text.Length}");
-                report[i].Add($"平均码长\t{(double)way.Length / text.Length}");
-            }
-            Console.WriteLine("分析完成。");
-            return report;
         }
     }
 }
