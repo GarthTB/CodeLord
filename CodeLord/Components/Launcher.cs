@@ -11,7 +11,7 @@ namespace CodeLord.Components
             var constant = GetSentenceIn();
 
             Encoder.Encode(dict, text, constant);
-            Console.WriteLine("如需重新计算，请再次启动。按任意键退出...");
+            Console.WriteLine("程序结束。如需重新计算，请再次启动。按任意键退出...");
             _ = Console.ReadKey();
 
             static ConcurrentDictionary<string, string> GetDict()

@@ -14,8 +14,8 @@ namespace CodeLord.Components
             {
                 var tree = FindBranches(dict, text);
                 var bestWays = FindShortest(tree, text, constant);
-                var result = Analyze(bestWays, dict, text);
-                Output(result);
+                var report = Analyze(bestWays, text);
+                Reporter.Output(report);
             }
             catch (Exception e)
             {
@@ -85,17 +85,20 @@ namespace CodeLord.Components
 
         /// <summary> 分析每种最短编码并生成分析报告 </summary>
         /// <returns> 分析报告，每个元素为（第n种最短编码，各项评估列表） </returns>
-        private static List<(int, List<string>)> Analyze(List<string> bestWays, ConcurrentDictionary<string, string> dict, string text)
+        private static List<string>[] Analyze(List<string> bestWays, string text)
         {
             Console.WriteLine("正在分析每种最短编码并生成分析报告...");
-
+            var report = new List<string>[bestWays.Count];
+            for (int i = 0; i < bestWays.Count; i++)
+            {
+                string way = bestWays[i];
+                report[i] = [$"编码\t{way}"];
+                report[i].Add($"总码长\t{way.Length}");
+                report[i].Add($"字数\t{text.Length}");
+                report[i].Add($"平均码长\t{(double)way.Length / text.Length}");
+            }
             Console.WriteLine("分析完成。");
-        }
-
-        /// <summary> 以控制台或文件形式输出分析报告 </summary>
-        private static void OutPut(List<(int, List<string>)> report)
-        {
-
+            return report;
         }
     }
 }
