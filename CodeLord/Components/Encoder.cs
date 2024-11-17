@@ -68,16 +68,15 @@ namespace CodeLord.Components
                                        .ToList();
                 if (prefixes.Count == 0) continue;
 
-                foreach (var way in prefixes)
-                    _ = tempWays.Remove(way);
-
                 var mLength = prefixes.Min(x => x.Length);
-                _ = prefixes.RemoveAll(x => x.Length != mLength);
                 var suffixes = tree.Where(x => x.head == i);
-
-                foreach (var way in prefixes)
-                    foreach (var (_, length, code) in suffixes)
-                        tempWays[Concater.Join(codeID, way, code)] = i + length;
+                foreach (var prefix in prefixes)
+                {
+                    _ = tempWays.Remove(prefix);
+                    if (prefix.Length == mLength)
+                        foreach (var (_, length, code) in suffixes)
+                            tempWays[Concater.Join(codeID, prefix, code)] = i + length;
+                }
 
                 Console.Write($"\r已遍历至第{i}字。");
             }
