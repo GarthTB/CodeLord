@@ -8,9 +8,9 @@ namespace CodeLord.Components
         {
             var dict = GetDict();
             var text = GetText();
-            var constant = GetSentenceIn();
+            var codeID = GetCodeID();
 
-            Encoder.Encode(dict, text, constant);
+            Encoder.Encode(dict, text, codeID);
             Console.WriteLine("程序结束。如需重新计算，请再次启动。按任意键退出...");
             _ = Console.ReadKey();
 
@@ -40,14 +40,15 @@ namespace CodeLord.Components
                 return _text;
             }
 
-            static bool GetSentenceIn()
+            static int GetCodeID()
             {
-                Console.WriteLine("请指定是否为整句输入（1代表是，0代表否）：");
-                return Console.ReadLine() == "1";
+                Console.WriteLine("请指定编码连接方式：");
+                Console.WriteLine("（1：无间隔，2：键道，其他：空格隔开）");
+                return ParseCodeID(Console.ReadLine() ?? "0");
             }
         }
 
-        public static void Launch(string dictPath, string textPath, bool constant)
+        public static void Launch(string dictPath, string textPath, string codeID)
         {
             if (File.Exists(dictPath) && File.Exists(textPath))
             {
@@ -55,9 +56,12 @@ namespace CodeLord.Components
                     Console.WriteLine("词库载入失败。");
                 else if (!Loader.LoadText(textPath, out var text))
                     Console.WriteLine("文本载入失败。");
-                else Encoder.Encode(dict, text, constant);
+                else Encoder.Encode(dict, text, ParseCodeID(codeID));
             }
             else Console.WriteLine("无效的词库或文本路径。");
         }
+
+        private static int ParseCodeID(string codeID)
+            => codeID switch { "1" => 1, "2" => 2, _ => 0 };
     }
 }

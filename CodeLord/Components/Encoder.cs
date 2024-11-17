@@ -7,13 +7,13 @@ namespace CodeLord.Components
         /// <summary> 找出最短编码 </summary>
         /// <param name="dict"> 词库，键值对为（词，编码） </param>
         /// <param name="text"> 要编码的文本 </param>
-        /// <param name="constant"> 是否为整句输入。如果否，则词之间要加空格。 </param>
-        public static void Encode(ConcurrentDictionary<string, List<string>> dict, string text, bool constant)
+        /// <param name="codeID"> 词的分隔方式，0为空格，1为无分隔，2为键道 </param>
+        public static void Encode(ConcurrentDictionary<string, List<string>> dict, string text, int codeID)
         {
             try
             {
                 var tree = FindBranches(dict, text);
-                var ways = FindShortest(tree, text, constant);
+                var ways = FindShortest(tree, text, codeID);
                 var report = Analyze(ways, text);
                 Reporter.Output(report);
             }
@@ -49,9 +49,9 @@ namespace CodeLord.Components
         /// <summary> 遍历所有编码以找出最短编码并输出 </summary>
         /// <param name="tree"> 以（起始索引，词的长度，编码）表示的所有编码分支 </param>
         /// <param name="text"> 要编码的文本 </param>
-        /// <param name="constant"> 是否为整句输入。如果否，则词之间要加空格。 </param>
+        /// <param name="codeID"> 词的分隔方式，0为空格，1为无分隔，2为键道 </param>
         /// <returns> 长度最短的所有编码 </returns>
-        private static string[] FindShortest(ConcurrentBag<(int head, int length, string code)> tree, string text, bool constant)
+        private static string[] FindShortest(ConcurrentBag<(int head, int length, string code)> tree, string text, int codeID)
         {
             Console.WriteLine("正在遍历所有编码情况...");
             List<(string way, int tail)> tempWays = [];
@@ -75,7 +75,7 @@ namespace CodeLord.Components
 
                 foreach (var way in prefixes)
                     foreach (var (head, length, code) in suffixes)
-                        tempWays.Add((Concater.Join(constant, way, code), head + length));
+                        tempWays.Add((Concater.Join(codeID, way, code), head + length));
 
                 _ = tempWays.RemoveAll(x => x.tail == i);
                 Console.Write($"\r已遍历至第{i}字。");
