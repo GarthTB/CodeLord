@@ -8,12 +8,13 @@ namespace CodeLord.Components
         /// <param name="dict"> 词库，键值对为（词，编码） </param>
         /// <param name="text"> 要编码的文本 </param>
         /// <param name="codeID"> 词的分隔方式，0为空格，1为无分隔，2为键道 </param>
-        public static void Encode(ConcurrentDictionary<string, List<string>> dict, string text, int codeID)
+        /// <param name="limit"> 中间结果的最大数量 </param>
+        public static void Encode(ConcurrentDictionary<string, List<string>> dict, string text, int codeID, int limit)
         {
             try
             {
                 var tree = FindBranches(dict, text);
-                var ways = FindShortest(tree, text.Length, codeID);
+                var ways = FindShortest(tree, text.Length, codeID, limit);
                 var report = Analyzer.GenerateReport(ways, text);
                 Reporter.Output(report);
             }
@@ -49,8 +50,9 @@ namespace CodeLord.Components
         /// <param name="tree"> 键为起始索引，值为（词的长度，编码），每个索引都一定会有编码 </param>
         /// <param name="textLength"> 要编码的文本长度 </param>
         /// <param name="codeID"> 词的分隔方式，0为空格，1为无分隔，2为键道 </param>
+        /// <param name="limit"> 中间结果的最大数量 </param>
         /// <returns> 长度最短的所有编码 </returns>
-        private static string[] FindShortest(ConcurrentDictionary<int, List<(int, string)>> tree, int textLength, int codeID)
+        private static string[] FindShortest(ConcurrentDictionary<int, List<(int, string)>> tree, int textLength, int codeID, int limit)
         {
             Console.WriteLine($"正在遍历所有编码情况，共需遍历{textLength}字...");
             Dictionary<int, HashSet<string>> tempWays = []; // 键为末尾位置，值为编码集合
@@ -65,8 +67,10 @@ namespace CodeLord.Components
                 var heads = tempWays[i];
                 var minLen = heads.Min(x => x.Length);
                 _ = heads.RemoveWhere(x => x.Length != minLen);
+                var trimHeads = heads.Take(limit);
+
                 var tails = tree[i];
-                foreach (var head in heads)
+                foreach (var head in trimHeads)
                     foreach (var (length, code) in tails) // code无重复项
                         Record(i + length, Concater.Join(codeID, head, code), tempWays);
 
@@ -76,7 +80,7 @@ namespace CodeLord.Components
             }
 
             var ways = tempWays[textLength]?.ToArray() ?? [];
-            Console.WriteLine($"\n遍历完成，共{ways.Length}种最短编码。");
+            Console.WriteLine($"\n遍历完成，共得到{ways.Length}种最短编码。");
             return ways;
 
             static void Record(int endIndex, string code, Dictionary<int, HashSet<string>> tempWays)
