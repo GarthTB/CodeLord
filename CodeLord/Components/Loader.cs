@@ -7,15 +7,13 @@ namespace CodeLord.Components
     {
         /// <summary> 载入词库 </summary>
         /// <param name="path"> 提供的词库路径 </param>
-        /// <param name="limit"> 分支长度限制 </param>
         /// <param name="dict"> 载入的词库，键值对为（词，编码） </param>
         /// <returns> 是否载入成功 </returns>
-        public static bool LoadDict(string path, out int limit, out ConcurrentDictionary<string, List<string>> dict)
+        public static bool LoadDict(string path, out ConcurrentDictionary<string, List<string>> dict)
         {
             try
             {
                 var entries = ReadEntries(path);
-                limit = entries.Select(x => x.Item1.Length).Max();
                 dict = GenerateRealCodes(entries);
                 Console.WriteLine($"词库载入成功，共{dict.Count}个词。");
                 return true;
@@ -23,7 +21,6 @@ namespace CodeLord.Components
             catch (Exception e)
             {
                 Console.WriteLine($"词库载入出错：{e.Message}");
-                limit = 0;
                 dict = [];
                 return false;
             }

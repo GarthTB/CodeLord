@@ -25,10 +25,10 @@
             var a = "abcdefghijklmnopqrstuvwxyz"; // 所有码元
             if (!a.Contains(tail[0]) && head[^1] == ' ') // 标点开头且前为空格，替换空格
                 return $"{head[..^1]}{tail}";
-            if (tail.Length < 4 && y.Contains(tail[^1])) // 不足4码且以音码结尾，后补空格
-                tail = $"{tail} ";
             if (x.Contains(tail[0]) && a.Contains(head[^1])) // 形码开头且无标点断开，前加空格
                 tail = $" {tail}";
+            if (tail.Length < 4 && y.Contains(tail[^1])) // 不足4码且以音码结尾，后补空格
+                tail = $"{tail} ";
             return $"{head}{tail}";
         }
     }

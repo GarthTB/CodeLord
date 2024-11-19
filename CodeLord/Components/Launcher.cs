@@ -6,26 +6,25 @@ namespace CodeLord.Components
     {
         public static void Initialize()
         {
-            var (limit, dict) = GetDict();
+            var dict = GetDict();
             var text = GetText();
             var codeID = GetCodeID();
 
-            Encoder.Encode(limit, dict, text, codeID);
+            Encoder.Encode(dict, text, codeID);
             Console.WriteLine("程序结束。如需重新计算，请再次启动。按任意键退出...");
             _ = Console.ReadKey();
 
-            static (int, ConcurrentDictionary<string, List<string>>) GetDict()
+            static ConcurrentDictionary<string, List<string>> GetDict()
             {
                 Console.WriteLine("请输入词库路径：");
                 var path = Console.ReadLine();
-                int limit;
                 ConcurrentDictionary<string, List<string>> _dict;
-                while (!File.Exists(path) || !Loader.LoadDict(path, out limit, out _dict))
+                while (!File.Exists(path) || !Loader.LoadDict(path, out _dict))
                 {
                     Console.WriteLine("词库路径无效或载入失败。请重新输入：");
                     path = Console.ReadLine();
                 }
-                return (limit, _dict);
+                return _dict;
             }
 
             static string GetText()
@@ -53,11 +52,11 @@ namespace CodeLord.Components
         {
             if (File.Exists(dictPath) && File.Exists(textPath))
             {
-                if (!Loader.LoadDict(dictPath, out var limit, out var dict))
+                if (!Loader.LoadDict(dictPath, out var dict))
                     Console.WriteLine("词库载入失败。");
                 else if (!Loader.LoadText(textPath, out var text))
                     Console.WriteLine("文本载入失败。");
-                else Encoder.Encode(limit, dict, text, ParseCodeID(codeID));
+                else Encoder.Encode(dict, text, ParseCodeID(codeID));
             }
             else Console.WriteLine("无效的词库或文本路径。");
         }
