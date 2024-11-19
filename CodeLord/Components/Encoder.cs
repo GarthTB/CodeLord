@@ -41,9 +41,9 @@ namespace CodeLord.Components
 
             for (int i = 0; i < text.Length; i++)
             {
-                var heads = tempWays[i].OrderBy(x => x.Length)
-                                       .Take(limit); // 最短路径
+                var heads = tempWays[i].OrderBy(x => x.Length).Take(limit); // 最短路径
                 var tails = FindBranches(dict, slices[i]);
+
                 foreach (var head in heads)
                     foreach (var (length, codes) in tails) // code无重复项
                         foreach (var code in codes)
