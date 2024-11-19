@@ -33,14 +33,18 @@ namespace CodeLord.Components
         {
             Console.WriteLine($"共需遍历{text.Length}字，正在遍历...");
             Dictionary<int, HashSet<string>> tempWays = new(text.Length) { [0] = [""] }; // 键为末尾位置，值为编码集合
+            var maxLen = dict.Keys.Max(x => x.Length); // 词库中的最大字数
+            var slices = Enumerable.Range(0, text.Length)
+                                   .Select(i => new string(text.Skip(i).Take(maxLen).ToArray()))
+                                   .ToArray()
+                                   .AsSpan(); // 预先切片以提升性能
 
             for (int i = 0; i < text.Length; i++)
             {
-                var heads = tempWays[i];
-                var minLen = heads.Min(x => x.Length);
-                var trimHeads = heads.Where(x => x.Length == minLen).Take(limit);
-                var tails = FindBranches(dict, text, i);
-                foreach (var head in trimHeads)
+                var heads = tempWays[i].OrderBy(x => x.Length)
+                                       .Take(limit); // 最短路径
+                var tails = FindBranches(dict, slices[i]);
+                foreach (var head in heads)
                     foreach (var (length, codes) in tails) // code无重复项
                         foreach (var code in codes)
                             RecordWays(i + length, Concater.Join(codeID, head, code), tempWays);
@@ -53,12 +57,12 @@ namespace CodeLord.Components
             Console.WriteLine($"\n遍历完成，共得到{ways.Length}种最短编码。");
             return ways;
 
-            static (int, List<string>)[] FindBranches(ConcurrentDictionary<string, List<string>> dict, string text, int i)
+            static (int, List<string>)[] FindBranches(ConcurrentDictionary<string, List<string>> dict, string text)
             {
-                var branches = dict.Where(x => text[i..].StartsWith(x.Key))
+                var branches = dict.Where(x => text.StartsWith(x.Key))
                                    .Select(x => (x.Key.Length, x.Value)) // Value无重复项
                                    .ToArray();
-                return branches.Length == 0 ? [(1, [text.Substring(i, 1)])] : branches;
+                return branches.Length == 0 ? [(1, [text[0..1]])] : branches;
             }
 
             static void RecordWays(int endIndex, string code, Dictionary<int, HashSet<string>> tempWays)
