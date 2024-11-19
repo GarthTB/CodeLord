@@ -56,12 +56,7 @@ namespace CodeLord.Components
             Dictionary<int, HashSet<string>> tempWays = []; // 键为末尾位置，值为编码集合
             var starters = tree[0];
             foreach (var (length, code) in starters)
-                if (!tempWays.TryGetValue(length, out var hashSet))
-                {
-                    hashSet = [code];
-                    tempWays[length] = hashSet;
-                }
-                else _ = hashSet.Add(code);
+                Record(length, code, tempWays);
 
             for (int i = 1; i < textLength; i++)
             {
@@ -73,12 +68,7 @@ namespace CodeLord.Components
                 var tails = tree[i];
                 foreach (var head in heads)
                     foreach (var (length, code) in tails) // code无重复项
-                        if (!tempWays.TryGetValue(i + length, out var hashSet))
-                        {
-                            hashSet = [Concater.Join(codeID, head, code)];
-                            tempWays[i + length] = hashSet;
-                        }
-                        else _ = hashSet.Add(Concater.Join(codeID, head, code));
+                        Record(i + length, Concater.Join(codeID, head, code), tempWays);
 
                 tempWays[i] = [];
 
@@ -88,6 +78,16 @@ namespace CodeLord.Components
             var ways = tempWays[textLength]?.ToArray() ?? [];
             Console.WriteLine($"\n遍历完成，共{ways.Length}种最短编码。");
             return ways;
+
+            static void Record(int endIndex, string code, Dictionary<int, HashSet<string>> tempWays)
+            {
+                if (!tempWays.TryGetValue(endIndex, out var hashSet))
+                {
+                    hashSet = [code];
+                    tempWays[endIndex] = hashSet;
+                }
+                else _ = hashSet.Add(code);
+            }
         }
     }
 }
