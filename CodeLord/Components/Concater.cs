@@ -21,8 +21,6 @@
         /// <returns> 拼接后的编码 </returns>
         private static string JD(string head, string tail)
         {
-            var a = "abcdefghijklmnopqrstuvwxyz"; // 所有码元
-            var x = "aiouv"; // 形码码元
             var y = "bcdefghjklmnpqrstwxyz"; // 音码码元
 
             if (tail.Length < 4 && y.Contains(tail[^1])) // 不足4码且以音码结尾，后补空格
@@ -31,6 +29,8 @@
 
             var oldEnd = head[^1];
             var newStart = tail[0];
+            var a = "abcdefghijklmnopqrstuvwxyz"; // 所有码元
+            var x = "aiouv"; // 形码码元
             if (!a.Contains(newStart) && oldEnd == ' ') // 标点开头且前为空格，直接替换空格
                 return $"{head[..^1]}{tail}";
             if (x.Contains(newStart) && a.Contains(oldEnd)) // 形码开头且无标点断开，前加空格
