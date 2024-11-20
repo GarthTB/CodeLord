@@ -29,7 +29,7 @@
         /// <param name="report"> 分析报告 </param>
         private static void ReportCodeLength(string text, string route, List<string> report)
         {
-            report.Add($"总码长\t{route.Length}");
+            report.Add($"码数\t{route.Length}");
             report.Add($"字数\t{text.Length}");
             report.Add($"字均码长\t{(double)route.Length / text.Length}");
         }
@@ -50,15 +50,21 @@
                 counts.Add(route.Count(keys.Contains));
             counts.Add(route.Length - counts.Sum()); // 其他
 
+            var leftSum = counts[0..4].Sum();
+            var rightSum = counts[4..8].Sum();
+            report.Add($"左手\t{(double)leftSum / route.Length}");
             report.Add($"左小指\t{(double)counts[0] / route.Length}");
             report.Add($"左无名\t{(double)counts[1] / route.Length}");
             report.Add($"左中指\t{(double)counts[2] / route.Length}");
             report.Add($"左食指\t{(double)counts[3] / route.Length}");
+            report.Add($"右手\t{(double)rightSum / route.Length}");
             report.Add($"右食指\t{(double)counts[4] / route.Length}");
             report.Add($"右中指\t{(double)counts[5] / route.Length}");
             report.Add($"右无名\t{(double)counts[6] / route.Length}");
             report.Add($"右小指\t{(double)counts[7] / route.Length}");
             report.Add($"其他指\t{(double)counts[8] / route.Length}");
+            if (leftSum != 0 && rightSum != 0)
+                report.Add($"偏倚程度\t{(double)Math.Abs(leftSum - rightSum) / (leftSum + rightSum)}");
         }
 
         /// <summary> 记录（数字排、上排、中排、下排、其他排）的使用率 </summary>
