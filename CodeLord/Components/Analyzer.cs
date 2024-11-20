@@ -7,6 +7,8 @@
         public static List<string> GenerateReport(string[] routes, string text)
         {
             Console.WriteLine("正在分析每种最短编码并生成分析报告...");
+            if (!Loader.LoadConfig(out var config))
+                Console.WriteLine("将不会分析各手指和各排键的使用率。");
             List<string> report = [];
             for (int i = 0; i < routes.Length; i++)
             {
@@ -14,8 +16,8 @@
                 report.Add($"第{i + 1}种最短编码：");
                 report.Add(route);
                 ReportCodeLength(text, route, report);
-                ReportFingerRates(route, report);
-                ReportRowRates(route, report);
+                ReportFingerRates(route, report, config);
+                ReportRowRates(route, report, config);
                 ReportSpaceRate(route, report);
                 report.Add(""); // 用来分隔的空行
             }
@@ -37,13 +39,10 @@
         /// <summary> 记录（左小指、无名指、中指、食指，右食指、中指、无名指、小指，其他）的使用率 </summary>
         /// <param name="route"> 一篇文章的完整编码 </param>
         /// <param name="report"> 分析报告 </param>
-        private static void ReportFingerRates(string route, List<string> report)
+        /// <param name="config"> 配置文件 </param>
+        private static void ReportFingerRates(string route, List<string> report, string[] config)
         {
-            if (!Loader.LoadConfig(out var config))
-            {
-                Console.WriteLine("将不会分析各手指的使用率。");
-                return;
-            }
+            if (config.Length == 0) return;
 
             List<int> counts = [];
             foreach (var keys in config.Take(8))
@@ -70,13 +69,10 @@
         /// <summary> 记录（数字排、上排、中排、下排、其他排）的使用率 </summary>
         /// <param name="route"> 一篇文章的完整编码 </param>
         /// <param name="report"> 分析报告 </param>
-        private static void ReportRowRates(string route, List<string> report)
+        /// <param name="config"> 配置文件 </param>
+        private static void ReportRowRates(string route, List<string> report, string[] config)
         {
-            if (!Loader.LoadConfig(out var config))
-            {
-                Console.WriteLine("将不会分析各排键的使用率。");
-                return;
-            }
+            if (config.Length == 0) return;
 
             List<int> counts = [];
             foreach (var keys in config.Skip(8).Take(4))
