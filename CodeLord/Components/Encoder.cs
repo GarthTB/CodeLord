@@ -31,6 +31,7 @@ namespace CodeLord.Components
             Console.WriteLine("正在逐字切片文本...");
             var maxLen = dict.Keys.Max(x => x.Length); // 词库中的最大字数
             var slices = Enumerable.Range(0, text.Length)
+                                   .AsParallel()
                                    .Select(i => new string(text.Skip(i).Take(maxLen).ToArray()))
                                    .ToArray()
                                    .AsSpan();
