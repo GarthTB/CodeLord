@@ -7,7 +7,7 @@ namespace CodeLord.Components
         /// <summary> 找出最短编码 </summary>
         /// <param name="dict"> 词库，键值对为（词，编码） </param>
         /// <param name="text"> 要编码的文本 </param>
-        /// <param name="codeID"> 词的分隔方式，0为空格，1为无分隔，2为键道 </param>
+        /// <param name="codeID"> 词的分隔方式，0为空格及标点，1为无分隔，2为键道 </param>
         /// <param name="limit"> 中间结果的最大数量 </param>
         public static void Encode(ConcurrentDictionary<string, List<string>> dict, string text, int codeID, int limit)
         {
@@ -41,7 +41,7 @@ namespace CodeLord.Components
         /// <summary> 遍历所有编码以找出最短编码并输出 </summary>
         /// <param name="dict"> 词库，键值对为（词，编码） </param>
         /// <param name="slices"> 文本逐字切片 </param>
-        /// <param name="codeID"> 词的分隔方式，0为空格，1为无分隔，2为键道 </param>
+        /// <param name="codeID"> 词的分隔方式，0为空格及标点，1为无分隔，2为键道 </param>
         /// <param name="limit"> 中间结果的最大数量 </param>
         /// <returns> 长度最短的所有编码 </returns>
         private static string[] FindShortest(ConcurrentDictionary<string, List<string>> dict, Span<string> slices, int codeID, int limit)
@@ -72,10 +72,11 @@ namespace CodeLord.Components
 
             static (int, List<string>)[] GetTails(ConcurrentDictionary<string, List<string>> dict, string text)
             {
-                var branches = dict.Where(x => text.StartsWith(x.Key))
-                                   .Select(x => (x.Key.Length, x.Value)) // Value无重复项
-                                   .ToArray();
-                return branches.Length == 0 ? [(1, [text[0..1]])] : branches;
+                var tails = dict.AsParallel()
+                                .Where(x => text.StartsWith(x.Key))
+                                .Select(x => (x.Key.Length, x.Value)) // Value无重复项
+                                .ToArray();
+                return tails.Length == 0 ? [(1, [text[0..1]])] : tails;
             }
         }
     }

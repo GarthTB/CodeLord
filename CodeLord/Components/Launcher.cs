@@ -44,14 +44,14 @@ namespace CodeLord.Components
             static int GetCodeID()
             {
                 Console.WriteLine("请指定编码连接方式：");
-                Console.WriteLine("（1：无间隔，2：键道，其他：空格隔开）");
+                Console.WriteLine("（1：无间隔，2：键道，0及默认：空格及标点隔开）");
                 return ParseCodeID(Console.ReadLine() ?? "0");
             }
 
             static int GetLimit()
             {
                 Console.WriteLine("请指定中间路径的最高数量：");
-                Console.WriteLine("（不是最终路径的数量，但不影响最终路径的码长。无效输入则默认为100。）");
+                Console.WriteLine("（不是最终路径的数量，最终一定是最短路径。无效输入则默认为100。）");
                 return ParseLimit(Console.ReadLine() ?? "100");
             }
         }
