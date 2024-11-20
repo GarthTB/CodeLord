@@ -7,32 +7,26 @@ namespace CodeLord.Components
         public static string TextPath { private get; set; } = "";
 
         /// <summary> 输出分析报告到文件或控制台 </summary>
-        /// <param name="report"> 分析报告 </param>
-        public static void Output(List<string>[] report)
+        /// <param name="report"> 分析报告，每个元素为最终的一行 </param>
+        public static void Output(List<string> report)
         {
             if (!WriteFile(report))
                 OutputToConsole(report);
         }
 
-        private static bool WriteFile(List<string>[] report)
+        private static bool WriteFile(List<string> report)
         {
             try
             {
+                Console.WriteLine("正在将分析报告写入文件...");
                 var fullPath = Path.GetFullPath(TextPath);
                 var dir = Path.GetDirectoryName(fullPath)
                     ?? throw new NullReferenceException("路径为空。");
                 var originName = Path.GetFileNameWithoutExtension(fullPath);
                 var resultPath = Path.Combine(dir, $"{originName}的分析报告.txt");
-                using StreamWriter sw = new(resultPath, false, Encoding.UTF8);
-
-                for (int i = 0; i < report.Length; i++)
-                {
-                    sw.WriteLine($"第{i + 1}种最短编码：");
-                    foreach (var line in report[i])
-                        sw.WriteLine(line);
-                    sw.WriteLine();
-                }
-
+                using StreamWriter sw = new(resultPath, false, Encoding.UTF8); // 不续写，直接覆盖
+                foreach (var line in report)
+                    sw.WriteLine(line);
                 Console.WriteLine("分析报告已成功写入文件。");
                 return true;
             }
@@ -44,15 +38,10 @@ namespace CodeLord.Components
             }
         }
 
-        private static void OutputToConsole(List<string>[] report)
+        private static void OutputToConsole(List<string> report)
         {
-            for (int i = 0; i < report.Length; i++)
-            {
-                Console.WriteLine($"第{i + 1}种最短编码：");
-                foreach (var line in report[i])
-                    Console.WriteLine(line);
-                Console.WriteLine();
-            }
+            foreach (var line in report)
+                Console.WriteLine(line);
             Console.WriteLine("分析报告输出完毕。");
         }
     }

@@ -95,5 +95,35 @@ namespace CodeLord.Components
                 return false;
             }
         }
+
+        /// <summary> 载入配置文件 </summary>
+        /// <param name="config"> 配置文件的每一行 </param>
+        /// <returns> 是否载入成功 </returns>
+        /// <exception cref="FileNotFoundException"> 找不到配置文件config.txt </exception>
+        public static bool LoadConfig(out string[] config)
+        {
+            try
+            {
+                string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.txt");
+                if (!File.Exists(configPath))
+                    throw new FileNotFoundException("找不到配置文件config.txt");
+                config = File.ReadAllLines(configPath)
+                             .Select(RemoveComment)
+                             .ToArray();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"配置文件载入出错：{e.Message}");
+                config = [];
+                return false;
+            }
+
+            static string RemoveComment(string line)
+            {
+                int commentIndex = line.IndexOf("//");
+                return commentIndex != -1 ? line[..commentIndex].Trim() : line.Trim();
+            }
+        }
     }
 }
