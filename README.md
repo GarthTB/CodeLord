@@ -1,4 +1,4 @@
-# [Rime词库管理器](https://github.com/GarthTB/CodeLord)
+# [CodeLord](https://github.com/GarthTB/CodeLord)
 
 一个暴力计算文章最短码长的工具
 
